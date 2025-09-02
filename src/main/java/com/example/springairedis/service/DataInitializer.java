@@ -8,7 +8,9 @@ import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.util.List;
 
 @Component
@@ -18,7 +20,7 @@ public class DataInitializer {
     @Autowired
     private VectorStore vectorStore;
 
-    @PostConstruct
+   /* @PostConstruct
     public void initData() {
         TextReader textReader = new TextReader(new ClassPathResource("product_details.txt"));
         TokenTextSplitter splitter = new TokenTextSplitter(100, 30, 5, 500, false);
@@ -26,5 +28,13 @@ public class DataInitializer {
                 = splitter.split(textReader.get());
         vectorStore.add(documents);
 
+    }*/
+
+    public void processFile(MultipartFile file) throws Exception {
+        InputStream inputStream = file.getInputStream();
+        TextReader textReader = new TextReader(new org.springframework.core.io.InputStreamResource(inputStream));
+        TokenTextSplitter splitter = new TokenTextSplitter(100, 30, 5, 500, false);
+        List<Document> documents = splitter.split(textReader.get());
+        vectorStore.add(documents);
     }
 }

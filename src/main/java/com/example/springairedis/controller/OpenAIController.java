@@ -1,5 +1,6 @@
 package com.example.springairedis.controller;
 
+import com.example.springairedis.service.DataInitializer;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -26,6 +28,9 @@ public class OpenAIController {
     @Autowired
     @Qualifier("openAiEmbeddingModel")
     private EmbeddingModel embeddingModel;
+
+    @Autowired
+    private DataInitializer dataInitializer;
 
 
     public OpenAIController(OpenAiChatModel chatModel) {
@@ -111,8 +116,19 @@ public class OpenAIController {
 
     @PostMapping("/api/product")
     public List<Document> getProducts(@RequestParam String text) {
-
         return vectorStore.similaritySearch(text);
+    }
+
+
+
+    @PostMapping(value="/upload",consumes = "multipart/form-data")
+    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
+        try {
+            dataInitializer.processFile(file);
+            return ResponseEntity.ok("File processed and data added to vector store.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error processing file: " + e.getMessage());
+        }
     }
 
 }
