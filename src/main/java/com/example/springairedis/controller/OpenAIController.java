@@ -2,6 +2,7 @@ package com.example.springairedis.controller;
 
 import com.example.springairedis.service.DataInitializer;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
@@ -120,6 +121,13 @@ public class OpenAIController {
     }
 
 
+
+    @GetMapping("/api/{message}")
+    public String getQuery(@PathVariable String message) {
+        return chatClient.prompt(message).advisors(new QuestionAnswerAdvisor(vectorStore))
+                .call()
+                .content();
+    }
 
     @PostMapping(value="/upload",consumes = "multipart/form-data")
     public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
